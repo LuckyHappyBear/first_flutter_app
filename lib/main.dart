@@ -112,6 +112,17 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) {
+                    return const NewRoute();
+                  }),
+                );
+              },
+              child: const Text("open new route"),
+            )
           ],
         ),
       ),
@@ -120,6 +131,23 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class NewRoute extends StatelessWidget {
+
+  const NewRoute({super.key});
+
+  @override
+  Widget build(BuildContext context){
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("New route"),
+      ),
+      body: const Center(
+        child: Text("This is new route"),
+      ),
     );
   }
 }
