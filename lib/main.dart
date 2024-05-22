@@ -31,6 +31,13 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
         useMaterial3: true,
       ),
+      // 注册路由表
+      routes: {
+        "new_page":(context) => const NewRoute(),
+        "tip_page":(context) {
+          return TipRoute(text: ModalRoute.of(context)?.settings.arguments as String);
+        }
+      },
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -112,20 +119,23 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
+            TextButton(
+              onPressed: () {
+                Navigator.pushNamed(
+                  context,
+                  "new_page"
+                );
+              },
+              child: const Text("open new route"),
+            ),
             Center(
               child: ElevatedButton(
                 onPressed: () async {
                   // 打开`TipRoute`，并等待返回结果
-                  var result = await Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) {
-                        return const TipRoute(
-                          // 路由参数
-                          text: "我是提示xxxx",
-                        );
-                      },
-                    ),
+                  var result = await Navigator.pushNamed(
+                      context,
+                      "tip_page",
+                      arguments: "我是提示命名路由跳转的"
                   );
                   //输出`TipRoute`路由返回结果
                   print("路由返回值: $result");
