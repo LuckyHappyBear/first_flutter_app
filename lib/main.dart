@@ -86,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: const Center(
+      body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
@@ -105,35 +105,23 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            Padding(
-              //上下左右各添加16像素补白
-              padding: EdgeInsets.all(16),
-              child: Column(
-                //显式指定对齐方式为左对齐，排除对齐干扰
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: <Widget>[
-                  Padding(
-                    //左边添加8像素补白
-                    padding: EdgeInsets.only(left: 8),
-                    child: Text(
-                      "Hello world",
-                      style: TextStyle(fontSize: 18.0),
-                    ),
+            DecoratedBox(
+                decoration: BoxDecoration(
+                    gradient: LinearGradient(colors: [Colors.red, Colors.orange.shade700]), //背景渐变
+                    borderRadius: BorderRadius.circular(3.0), //3像素圆角
+                    boxShadow: const [
+                      //阴影
+                      BoxShadow(color: Colors.black54, offset: Offset(2.0, 2.0), blurRadius: 4.0)
+                    ]
+                ),
+                child: const Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 18.0),
+                  child: Text(
+                    "Login",
+                    style: TextStyle(color: Colors.white),
                   ),
-                  Padding(
-                    //上下各添加8像素补白
-                    padding: EdgeInsets.symmetric(vertical: 8),
-                    child: Text("I am Jack", style: TextStyle(fontSize: 18.0)),
-                  ),
-                  Padding(
-                    // 分别指定四个方向的补白
-                    padding: EdgeInsets.fromLTRB(20, 0, 20, 20),
-                    child: Text("Your friend", style: TextStyle(fontSize: 18.0)),
-                  )
-                ],
-              ),
-            ),
+                )
+            )
           ],
         ),
       ),
