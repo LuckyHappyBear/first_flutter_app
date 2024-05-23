@@ -110,40 +110,29 @@ class _MyHomePageState extends State<MyHomePage> {
               //测试Row对齐方式，排除Column默认居中对齐的干扰
               crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  spacing: 8.0, // 主轴(水平)方向间距
+                  runSpacing: 4.0, // 纵轴（垂直）方向间距
+                  alignment: WrapAlignment.center, //沿主轴方向居中
                   children: <Widget>[
-                    Text(" hello world "),
-                    Text(" I am Jack "),
-                  ],
-                ),
-                Row(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(" hello world "),
-                    Text(" I am Jack "),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.end,
-                  textDirection: TextDirection.rtl,
-                  children: <Widget>[
-                    Text(" hello world "),
-                    Text(" I am Jack "),
-                  ],
-                ),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  verticalDirection: VerticalDirection.up,
-                  children: <Widget>[
-                    Text(
-                      " hello world ",
-                      style: TextStyle(fontSize: 30.0),
+                    Chip(
+                      avatar: CircleAvatar(backgroundColor: Colors.blue, child: Text('A')),
+                      label: Text('Hamilton'),
                     ),
-                    Text(" I am Jack "),
+                    Chip(
+                      avatar: CircleAvatar(backgroundColor: Colors.blue, child: Text('M')),
+                      label: Text('Lafayette'),
+                    ),
+                    Chip(
+                      avatar: CircleAvatar(backgroundColor: Colors.blue, child: Text('H')),
+                      label: Text('Mulligan'),
+                    ),
+                    Chip(
+                      avatar: CircleAvatar(backgroundColor: Colors.blue, child: Text('J')),
+                      label: Text('Laurens'),
+                    ),
                   ],
-                ),
+                )
               ],
             ),
           ],
