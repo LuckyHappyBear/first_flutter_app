@@ -88,25 +88,12 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: Scrollbar(
-          // 显示进度条
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16.0),
-            child: Center(
-              child: Column(
-                //动态创建一个List<Widget>
-                children: str
-                    .split("")
-                    //每一个字母都用一个Text显示,字体为原来的两倍
-                    .map((c) => Text(
-                          c,
-                          textScaleFactor: 2.0,
-                        ))
-                    .toList(),
-              ),
-            ),
-          ),
-        ),
+        child: ListView.builder(
+            itemCount: 100,
+            itemExtent: 50.0, //强制高度为50.0
+            itemBuilder: (BuildContext context, int index) {
+              return ListTile(title: Text("$index"));
+            }),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
