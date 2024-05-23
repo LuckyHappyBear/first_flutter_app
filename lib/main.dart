@@ -112,22 +112,14 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-            ElevatedButton(
-              child: const Text("ElevatedButton"),
-              onPressed: () {},
-            ),
             TextButton(
-              child: const Text("TextButton"),
-              onPressed: () {},
-            ),
-            OutlinedButton(
-              child: const Text("OutlinedButton"),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: const Icon(Icons.thumb_up),
-              onPressed: () {},
-            ),
+              child: const Text("open new route"),
+              onPressed: () {
+                Navigator.push(context, MaterialPageRoute(builder: (context) {
+                  return const ImageAndIconRoute();
+                }));
+              },
+            )
           ],
         ),
       ),
@@ -136,6 +128,91 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class ImageAndIconRoute extends StatelessWidget {
+  const ImageAndIconRoute({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    var img = const NetworkImage("https://avatars2.githubusercontent.com/u/20411648?s=460&v=4");
+    return SingleChildScrollView(
+      child: Column(
+          children: <Image>[
+        Image(
+          image: img,
+          height: 50.0,
+          width: 100.0,
+          fit: BoxFit.fill,
+        ),
+        Image(
+          image: img,
+          height: 50,
+          width: 50.0,
+          fit: BoxFit.contain,
+        ),
+        Image(
+          image: img,
+          width: 100.0,
+          height: 50.0,
+          fit: BoxFit.cover,
+        ),
+        Image(
+          image: img,
+          width: 100.0,
+          height: 50.0,
+          fit: BoxFit.fitWidth,
+        ),
+        Image(
+          image: img,
+          width: 100.0,
+          height: 50.0,
+          fit: BoxFit.fitHeight,
+        ),
+        Image(
+          image: img,
+          width: 100.0,
+          height: 50.0,
+          fit: BoxFit.scaleDown,
+        ),
+        Image(
+          image: img,
+          height: 50.0,
+          width: 100.0,
+          fit: BoxFit.none,
+        ),
+        Image(
+          image: img,
+          width: 100.0,
+          color: Colors.blue,
+          colorBlendMode: BlendMode.difference,
+          fit: BoxFit.fill,
+        ),
+        Image(
+          image: img,
+          width: 100.0,
+          height: 200.0,
+          repeat: ImageRepeat.repeatY,
+        )
+      ].map((e) {
+        return Row(
+          children: <Widget>[
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: SizedBox(
+                width: 100,
+                child: e,
+              ),
+            ),
+            Text(
+              e.fit.toString() != "null" ? e.fit.toString() : e.repeat.toString(),
+              style: const TextStyle(fontSize: 18.0),
+            )
+          ],
+        );
+      }).toList()),
     );
   }
 }
