@@ -87,7 +87,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
+      body: const Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
@@ -106,27 +106,46 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            ConstrainedBox(
-              constraints: const BoxConstraints(
-                  minWidth: double.infinity, //宽度尽可能大
-                  minHeight: 80.0 //最小高度为50像素
-              ),
-              child: redBox
+            Column(
+              //测试Row对齐方式，排除Column默认居中对齐的干扰
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(" hello world "),
+                    Text(" I am Jack "),
+                  ],
+                ),
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Text(" hello world "),
+                    Text(" I am Jack "),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  textDirection: TextDirection.rtl,
+                  children: <Widget>[
+                    Text(" hello world "),
+                    Text(" I am Jack "),
+                  ],
+                ),
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  verticalDirection: VerticalDirection.up,
+                  children: <Widget>[
+                    Text(
+                      " hello world ",
+                      style: TextStyle(fontSize: 30.0),
+                    ),
+                    Text(" I am Jack "),
+                  ],
+                ),
+              ],
             ),
-            SizedBox(
-                width: 80.0,
-                height: 80.0,
-                child: redBox
-            ),
-            ConstrainedBox(
-                constraints: const BoxConstraints(minWidth: 60.0, minHeight: 100.0),  //父
-                child: UnconstrainedBox( //“去除”父级限制
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(minWidth: 90.0, minHeight: 20.0),//子
-                    child: redBox,
-                  ),
-                )
-            )
           ],
         ),
       ),
