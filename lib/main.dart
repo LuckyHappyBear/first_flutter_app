@@ -76,6 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
+    Widget redBox = const DecoratedBox(decoration: BoxDecoration(color: Colors.red));
     return Scaffold(
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
@@ -103,15 +104,29 @@ class _MyHomePageState extends State<MyHomePage> {
           // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
           // action in the IDE, or press "p" in the console), to see the
           // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
+            ConstrainedBox(
+              constraints: const BoxConstraints(
+                  minWidth: double.infinity, //宽度尽可能大
+                  minHeight: 80.0 //最小高度为50像素
+              ),
+              child: redBox
             ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
+            SizedBox(
+                width: 80.0,
+                height: 80.0,
+                child: redBox
             ),
+            ConstrainedBox(
+                constraints: const BoxConstraints(minWidth: 60.0, minHeight: 100.0),  //父
+                child: UnconstrainedBox( //“去除”父级限制
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(minWidth: 90.0, minHeight: 20.0),//子
+                    child: redBox,
+                  ),
+                )
+            )
           ],
         ),
       ),
