@@ -112,31 +112,22 @@ class _MyHomePageState extends State<MyHomePage> {
               '$_counter',
               style: Theme.of(context).textTheme.headlineMedium,
             ),
-          Text("Hello world",
-            style: TextStyle(
-                color: Colors.blue,
-                fontSize: 18.0,
-                height: 1.2,
-                fontFamily: "Courier",
-                background: Paint()..color=Colors.yellow,
-                decoration:TextDecoration.underline,
-                decorationStyle: TextDecorationStyle.dashed
+            ElevatedButton(
+              child: const Text("ElevatedButton"),
+              onPressed: () {},
             ),
-          ),
-            const Text.rich(TextSpan(
-                children: [
-                  TextSpan(
-                      text: "Home: "
-                  ),
-                  TextSpan(
-                      text: "https://flutterchina.club",
-                      style: TextStyle(
-                          color: Colors.blue
-                      ),
-                      recognizer: null
-                  ),
-                ]
-            ))
+            TextButton(
+              child: const Text("TextButton"),
+              onPressed: () {},
+            ),
+            OutlinedButton(
+              child: const Text("OutlinedButton"),
+              onPressed: () {},
+            ),
+            IconButton(
+              icon: const Icon(Icons.thumb_up),
+              onPressed: () {},
+            ),
           ],
         ),
       ),
