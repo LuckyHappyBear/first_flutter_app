@@ -105,22 +105,35 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            DecoratedBox(
-                decoration: BoxDecoration(
-                    gradient: LinearGradient(colors: [Colors.red, Colors.orange.shade700]), //背景渐变
-                    borderRadius: BorderRadius.circular(3.0), //3像素圆角
-                    boxShadow: const [
-                      //阴影
-                      BoxShadow(color: Colors.black54, offset: Offset(2.0, 2.0), blurRadius: 4.0)
-                    ]
+            Container(
+              margin: const EdgeInsets.only(top: 50.0, left: 120.0),
+              constraints: const BoxConstraints.tightFor(width: 200.0, height: 150.0),
+              //卡片大小
+              decoration: const BoxDecoration(
+                //背景装饰
+                gradient: RadialGradient(
+                  //背景径向渐变
+                  colors: [Colors.red, Colors.orange],
+                  center: Alignment.topLeft,
+                  radius: .98,
                 ),
-                child: const Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 80.0, vertical: 18.0),
-                  child: Text(
-                    "Login",
-                    style: TextStyle(color: Colors.white),
-                  ),
-                )
+                boxShadow: [
+                  //卡片阴影
+                  BoxShadow(
+                    color: Colors.black54,
+                    offset: Offset(2.0, 2.0),
+                    blurRadius: 4.0,
+                  )
+                ],
+              ),
+              transform: Matrix4.rotationZ(.2),
+              //卡片倾斜变换
+              alignment: Alignment.center,
+              //卡片内文字居中
+              child: const Text(
+                //卡片文字
+                "5.20", style: TextStyle(color: Colors.white, fontSize: 40.0),
+              ),
             )
           ],
         ),
