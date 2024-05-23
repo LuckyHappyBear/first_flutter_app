@@ -87,55 +87,29 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: const Center(
+      body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
-        child: Column(
-          // Column is also a layout widget. It takes a list of children and
-          // arranges them vertically. By default, it sizes itself to fit its
-          // children horizontally, and tries to be as tall as its parent.
-          //
-          // Column has various properties to control how it sizes itself and
-          // how it positions its children. Here we use mainAxisAlignment to
-          // center the children vertically; the main axis here is the vertical
-          // axis because Columns are vertical (the cross axis would be
-          // horizontal).
-          //
-          // TRY THIS: Invoke "debug painting" (choose the "Toggle Debug Paint"
-          // action in the IDE, or press "p" in the console), to see the
-          // wireframe for each widget.
-          mainAxisAlignment: MainAxisAlignment.start,
-          children: <Widget>[
-            Column(
-              //测试Row对齐方式，排除Column默认居中对齐的干扰
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Wrap(
-                  spacing: 8.0, // 主轴(水平)方向间距
-                  runSpacing: 4.0, // 纵轴（垂直）方向间距
-                  alignment: WrapAlignment.center, //沿主轴方向居中
-                  children: <Widget>[
-                    Chip(
-                      avatar: CircleAvatar(backgroundColor: Colors.blue, child: Text('A')),
-                      label: Text('Hamilton'),
-                    ),
-                    Chip(
-                      avatar: CircleAvatar(backgroundColor: Colors.blue, child: Text('M')),
-                      label: Text('Lafayette'),
-                    ),
-                    Chip(
-                      avatar: CircleAvatar(backgroundColor: Colors.blue, child: Text('H')),
-                      label: Text('Mulligan'),
-                    ),
-                    Chip(
-                      avatar: CircleAvatar(backgroundColor: Colors.blue, child: Text('J')),
-                      label: Text('Laurens'),
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ],
+        //通过ConstrainedBox来确保Stack占满屏幕
+        child: ConstrainedBox(
+          constraints: const BoxConstraints.expand(),
+          child: Stack(
+            alignment: Alignment.center, //指定未定位或部分定位widget的对齐方式
+            children: <Widget>[
+              Container(
+                color: Colors.red,
+                child: const Text("Hello world", style: TextStyle(color: Colors.white)),
+              ),
+              const Positioned(
+                left: 18.0,
+                child: Text("I am Jack"),
+              ),
+              const Positioned(
+                top: 18.0,
+                child: Text("Your friend"),
+              )
+            ],
+          ),
         ),
       ),
       floatingActionButton: FloatingActionButton(
