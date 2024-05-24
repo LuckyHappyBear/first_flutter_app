@@ -86,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: const Center(
+      body: Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
@@ -105,8 +105,17 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            PointerMoveIndicator(),
-            GestureTest(),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) {
+                    return const NotificationRoute();
+                  }),
+                );
+              },
+              child: const Text("open new route"),
+            ),
           ],
         ),
       ),
@@ -119,76 +128,57 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class GestureTest extends StatefulWidget {
-
-  const GestureTest({super.key});
+class NotificationRoute extends StatefulWidget {
+  const NotificationRoute({super.key});
 
   @override
-  State<StatefulWidget> createState() {
-    return _GestureTestState();
+  NotificationRouteState createState() {
+    return NotificationRouteState();
   }
 }
 
-class _GestureTestState extends State<GestureTest> {
-  String _operation = "No Gesture detected!"; //保存事件名
+class NotificationRouteState extends State<NotificationRoute> {
+  String _msg = "";
+
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: GestureDetector(
-        child: Container(
-          alignment: Alignment.center,
-          color: Colors.blue,
-          width: 200.0,
-          height: 100.0,
-          child: Text(
-            _operation,
-            style: const TextStyle(color: Colors.white),
+    //监听通知
+    return NotificationListener<MyNotification>(
+      onNotification: (notification) {
+        setState(() {
+          _msg += "${notification.msg}  ";
+        });
+        return true;
+      },
+      child: Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+//           ElevatedButton(
+//           onPressed: () => MyNotification("Hi").dispatch(context),
+//           child: Text("Send Notification"),
+//          ),
+              Builder(
+                builder: (context) {
+                  return ElevatedButton(
+                    //按钮点击时分发通知
+                    onPressed: () => MyNotification("Hi").dispatch(context),
+                    child: const Text("Send Notification"),
+                  );
+                },
+              ),
+              Text(_msg)
+            ],
           ),
         ),
-        onTap: () => updateText("Tap"), //点击
-        onDoubleTap: () => updateText("DoubleTap"), //双击
-        onLongPress: () => updateText("LongPress"), //长按
-      ),
+      )
     );
-  }
-
-  void updateText(String text) {
-    //更新显示的事件名
-    setState(() {
-      _operation = text;
-    });
   }
 }
 
-class PointerMoveIndicator extends StatefulWidget {
+class MyNotification extends Notification {
+  MyNotification(this.msg);
 
-  const PointerMoveIndicator({super.key});
-
-  @override
-  State<StatefulWidget> createState() {
-    return _PointerMoveIndicatorState();
-  }
-}
-
-class _PointerMoveIndicatorState extends State<PointerMoveIndicator> {
-  PointerEvent? _event;
-
-  @override
-  Widget build(BuildContext context) {
-    return Listener(
-      child: Container(
-        alignment: Alignment.center,
-        color: Colors.blue,
-        width: 300.0,
-        height: 150.0,
-        child: Text(
-          '${_event?.localPosition ?? ''}',
-          style: const TextStyle(color: Colors.white),
-        ),
-      ),
-      onPointerDown: (PointerDownEvent event) => setState(() => _event = event),
-      onPointerMove: (PointerMoveEvent event) => setState(() => _event = event),
-      onPointerUp: (PointerUpEvent event) => setState(() => _event = event),
-    );
-  }
+  final String msg;
 }
