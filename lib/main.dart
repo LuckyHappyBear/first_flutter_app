@@ -76,7 +76,11 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    String str = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    var children = <Widget>[];
+    // 生成 6 个 Tab 页
+    for (int i = 0; i < 6; ++i) {
+      children.add( Page( text: '$i'));
+    }
     return Scaffold(
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
@@ -88,20 +92,9 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: GridView(
-          padding: EdgeInsets.zero,
-          gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-              maxCrossAxisExtent: 120.0, childAspectRatio: 2.0 //宽高比为2
-              ),
-          children: const <Widget>[
-            Icon(Icons.ac_unit),
-            Icon(Icons.airport_shuttle),
-            Icon(Icons.all_inclusive),
-            Icon(Icons.beach_access),
-            Icon(Icons.cake),
-            Icon(Icons.free_breakfast),
-          ],
-        ),
+        child: PageView(
+          children: children,
+        )
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
@@ -109,5 +102,25 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+}
+
+class Page extends StatefulWidget {
+  const Page({
+    Key? key,
+    required this.text
+  }) : super(key: key);
+
+  final String text;
+
+  @override
+  State<Page> createState() => _PageState();
+}
+
+class _PageState extends State<Page> {
+  @override
+  Widget build(BuildContext context) {
+    print("build ${widget.text}");
+    return Center(child: Text("${widget.text}", textScaleFactor: 5));
   }
 }
