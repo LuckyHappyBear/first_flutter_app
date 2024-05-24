@@ -76,11 +76,6 @@ class _MyHomePageState extends State<MyHomePage> {
     // The Flutter framework has been optimized to make rerunning build methods
     // fast, so that you can just rebuild anything that needs updating rather
     // than having to individually change instances of widgets.
-    var children = <Widget>[];
-    // 生成 6 个 Tab 页
-    for (int i = 0; i < 6; ++i) {
-      children.add( Page( text: '$i'));
-    }
     return Scaffold(
       appBar: AppBar(
         // TRY THIS: Try changing the color here to a specific color (to
@@ -92,8 +87,16 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: PageView(
-          children: children,
+        child:TextButton(
+          onPressed: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) {
+                return TabViewRoute1();
+              }),
+            );
+          },
+          child: const Text("open new route"),
         )
       ),
       floatingActionButton: FloatingActionButton(
@@ -105,26 +108,87 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class Page extends StatefulWidget {
-  const Page({
-    Key? key,
-    required this.text
-  }) : super(key: key);
+class TabViewRoute1 extends StatefulWidget {
 
-  final String text;
+  const TabViewRoute1({super.key});
 
   @override
-  State<Page> createState() => _PageState();
+  State<TabViewRoute1> createState() => _TabViewRoute1State();
 }
 
-class _PageState extends State<Page> with AutomaticKeepAliveClientMixin {
+class _TabViewRoute1State extends State<TabViewRoute1>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+  List tabs = ["新闻", "历史", "图片"];
+
   @override
-  Widget build(BuildContext context) {
-    super.build(context);
-    print("build ${widget.text}");
-    return Center(child: Text(widget.text, textScaleFactor: 5));
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: tabs.length, vsync: this);
   }
 
   @override
-  bool get wantKeepAlive => true;
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("App Name"),
+        bottom: TabBar(
+          controller: _tabController,
+          tabs: tabs.map((e) => Tab(text: e)).toList(),
+        ),
+      ),
+      body: TabBarView( //构建
+        controller: _tabController,
+        children: tabs.map((e) {
+          return KeepAliveWrapper(
+            child: Container(
+              alignment: Alignment.center,
+              child: Text(e, textScaleFactor: 5),
+            ),
+          );
+        }).toList(),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    // 释放资源
+    _tabController.dispose();
+    super.dispose();
+  }
+}
+
+class KeepAliveWrapper extends StatefulWidget {
+  const KeepAliveWrapper({
+    Key? key,
+    this.keepAlive = true,
+    required this.child,
+  }) : super(key: key);
+  final bool keepAlive;
+  final Widget child;
+
+  @override
+  State<KeepAliveWrapper> createState() => _KeepAliveWrapperState();
+}
+
+class _KeepAliveWrapperState extends State<KeepAliveWrapper>
+    with AutomaticKeepAliveClientMixin {
+  @override
+  Widget build(BuildContext context) {
+    super.build(context);
+    return widget.child;
+  }
+
+  @override
+  void didUpdateWidget(covariant KeepAliveWrapper oldWidget) {
+    if(oldWidget.keepAlive != widget.keepAlive) {
+      // keepAlive 状态需要更新，实现在 AutomaticKeepAliveClientMixin 中
+      updateKeepAlive();
+    }
+    super.didUpdateWidget(oldWidget);
+  }
+
+  @override
+  bool get wantKeepAlive => widget.keepAlive;
 }
