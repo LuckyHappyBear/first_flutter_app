@@ -87,18 +87,17 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-          child:TextButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (context) {
-                  return const WillPopScopeTestRoute();
-                }),
-              );
-            },
-            child: const Text("open new route"),
-          )
-      ),
+          child: TextButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) {
+              return const InheritedWidgetTestRoute();
+            }),
+          );
+        },
+        child: const Text("open new route"),
+      )),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
@@ -108,34 +107,80 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+class ShareDataWidget extends InheritedWidget {
+  const ShareDataWidget({
+    Key? key,
+    required this.data,
+    required Widget child,
+  }) : super(key: key, child: child);
 
-class WillPopScopeTestRoute extends StatefulWidget {
-  const WillPopScopeTestRoute({super.key});
+  final int data; //需要在子树中共享的数据，保存点击次数
 
+  //定义一个便捷方法，方便子树中的widget获取共享数据
+  static ShareDataWidget? of(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<ShareDataWidget>();
+  }
+
+  //该回调决定当data发生变化时，是否通知子树中依赖data的Widget重新build
   @override
-  WillPopScopeTestRouteState createState() {
-    return WillPopScopeTestRouteState();
+  bool updateShouldNotify(ShareDataWidget old) {
+    return old.data != data;
   }
 }
 
-class WillPopScopeTestRouteState extends State<WillPopScopeTestRoute> {
-  DateTime? _lastPressedAt; //上次点击时间
+class _TestWidget extends StatefulWidget {
+  @override
+  __TestWidgetState createState() => __TestWidgetState();
+}
+
+class __TestWidgetState extends State<_TestWidget> {
+  @override
+  Widget build(BuildContext context) {
+    //使用InheritedWidget中的共享数据
+    return Text(ShareDataWidget.of(context)!.data.toString());
+  }
+
+  @override //下文会详细介绍。
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    //父或祖先widget中的InheritedWidget改变(updateShouldNotify返回true)时会被调用。
+    //如果build中没有依赖InheritedWidget，则此回调不会被调用。
+    print("Dependencies change");
+  }
+}
+
+class InheritedWidgetTestRoute extends StatefulWidget {
+  const InheritedWidgetTestRoute({super.key});
+
+  @override
+  State<InheritedWidgetTestRoute> createState() => _InheritedWidgetTestRouteState();
+}
+
+class _InheritedWidgetTestRouteState extends State<InheritedWidgetTestRoute> {
+  int count = 0;
 
   @override
   Widget build(BuildContext context) {
-    return WillPopScope(
-      onWillPop: () async {
-        if (_lastPressedAt == null ||
-            DateTime.now().difference(_lastPressedAt!) > Duration(seconds: 1)) {
-          //两次点击间隔超过1秒则重新计时
-          _lastPressedAt = DateTime.now();
-          return false;
-        }
-        return true;
-      },
-      child: Container(
-        alignment: Alignment.center,
-        child: const Text("1秒内连续按两次返回键退出"),
+    return Scaffold(
+      body: Center(
+        child: ShareDataWidget(
+          //使用ShareDataWidget
+          data: count,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Padding(
+                padding: const EdgeInsets.only(bottom: 20.0),
+                child: _TestWidget(), //子widget中依赖ShareDataWidget
+              ),
+              ElevatedButton(
+                child: const Text("Increment"),
+                //每点击一次，将count自增，然后重新build,ShareDataWidget的data将被更新
+                onPressed: () => setState(() => ++count),
+              )
+            ],
+          ),
+        ),
       ),
     );
   }
