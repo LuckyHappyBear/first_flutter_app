@@ -87,17 +87,25 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-          child: TextButton(
-        onPressed: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) {
-              return const ThemeTestRoute();
-            }),
-          );
-        },
-        child: const Text("open ThemeTest page"),
-      )),
+          child: FutureBuilder<String>(
+            future: mockNetworkData(),
+            builder: (BuildContext context, AsyncSnapshot snapshot) {
+              // 请求已结束
+              if (snapshot.connectionState == ConnectionState.done) {
+                if (snapshot.hasError) {
+                  // 请求失败，显示错误
+                  return Text("Error: ${snapshot.error}");
+                } else {
+                  // 请求成功，显示数据
+                  return Text("Contents: ${snapshot.data}");
+                }
+              } else {
+                // 请求未结束，显示loading
+                return const CircularProgressIndicator();
+              }
+            },
+          ),
+      ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
         tooltip: 'Increment',
@@ -107,66 +115,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class ThemeTestRoute extends StatefulWidget {
-
-  const ThemeTestRoute({super.key});
-
-  @override
-  State<ThemeTestRoute> createState() => _ThemeTestRouteState();
-}
-
-class _ThemeTestRouteState extends State<ThemeTestRoute> {
-  var _themeColor = Colors.teal; //当前路由主题色
-
-  @override
-  Widget build(BuildContext context) {
-    ThemeData themeData = Theme.of(context);
-    return Theme(
-      data: ThemeData(
-          primarySwatch: _themeColor, //用于导航栏、FloatingActionButton的背景色等
-          iconTheme: IconThemeData(color: _themeColor) //用于Icon颜色
-      ),
-      child: Scaffold(
-        appBar: AppBar(title: const Text("主题测试"), backgroundColor: _themeColor),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: <Widget>[
-            //第一行Icon使用主题中的iconTheme
-            const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  Icon(Icons.favorite),
-                  Icon(Icons.airport_shuttle),
-                  Text("  颜色跟随主题")
-                ]
-            ),
-            //为第二行Icon自定义颜色（固定为黑色)
-            Theme(
-              data: themeData.copyWith(
-                iconTheme: themeData.iconTheme.copyWith(
-                    color: Colors.black
-                ),
-              ),
-              child: const Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Icon(Icons.favorite),
-                    Icon(Icons.airport_shuttle),
-                    Text("  颜色固定黑色")
-                  ]
-              ),
-            ),
-          ],
-        ),
-        floatingActionButton: FloatingActionButton(
-            onPressed: () =>  //切换主题
-            setState(() =>
-            _themeColor =
-            _themeColor == Colors.teal ? Colors.blue : Colors.teal
-            ),
-            child: const Icon(Icons.palette)
-        ),
-      ),
-    );
-  }
+Future<String> mockNetworkData() async {
+  return Future.delayed(const Duration(seconds: 2), () => "我是从互联网上获取的数据");
 }
