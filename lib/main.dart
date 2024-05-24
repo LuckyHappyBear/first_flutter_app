@@ -88,12 +88,14 @@ class _MyHomePageState extends State<MyHomePage> {
         title: Text(widget.title),
       ),
       body: Center(
-        child: ListView.builder(
-            itemCount: 100,
-            itemExtent: 50.0, //强制高度为50.0
-            itemBuilder: (BuildContext context, int index) {
+        child: Column(children: <Widget>[
+          const ListTile(title:Text("商品列表")),
+          Expanded(
+            child: ListView.builder(itemBuilder: (BuildContext context, int index) {
               return ListTile(title: Text("$index"));
             }),
+          ),
+        ]),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
