@@ -92,11 +92,11 @@ class _MyHomePageState extends State<MyHomePage> {
           Navigator.push(
             context,
             MaterialPageRoute(builder: (context) {
-              return const InheritedWidgetTestRoute();
+              return const ThemeTestRoute();
             }),
           );
         },
-        child: const Text("open new route"),
+        child: const Text("open ThemeTest page"),
       )),
       floatingActionButton: FloatingActionButton(
         onPressed: _incrementCounter,
@@ -107,79 +107,64 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class ShareDataWidget extends InheritedWidget {
-  const ShareDataWidget({
-    Key? key,
-    required this.data,
-    required Widget child,
-  }) : super(key: key, child: child);
+class ThemeTestRoute extends StatefulWidget {
 
-  final int data; //需要在子树中共享的数据，保存点击次数
-
-  //定义一个便捷方法，方便子树中的widget获取共享数据
-  static ShareDataWidget? of(BuildContext context) {
-    return context.dependOnInheritedWidgetOfExactType<ShareDataWidget>();
-  }
-
-  //该回调决定当data发生变化时，是否通知子树中依赖data的Widget重新build
-  @override
-  bool updateShouldNotify(ShareDataWidget old) {
-    return old.data != data;
-  }
-}
-
-class _TestWidget extends StatefulWidget {
-  @override
-  __TestWidgetState createState() => __TestWidgetState();
-}
-
-class __TestWidgetState extends State<_TestWidget> {
-  @override
-  Widget build(BuildContext context) {
-    //使用InheritedWidget中的共享数据
-    return Text(ShareDataWidget.of(context)!.data.toString());
-  }
-
-  @override //下文会详细介绍。
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    //父或祖先widget中的InheritedWidget改变(updateShouldNotify返回true)时会被调用。
-    //如果build中没有依赖InheritedWidget，则此回调不会被调用。
-    print("Dependencies change");
-  }
-}
-
-class InheritedWidgetTestRoute extends StatefulWidget {
-  const InheritedWidgetTestRoute({super.key});
+  const ThemeTestRoute({super.key});
 
   @override
-  State<InheritedWidgetTestRoute> createState() => _InheritedWidgetTestRouteState();
+  State<ThemeTestRoute> createState() => _ThemeTestRouteState();
 }
 
-class _InheritedWidgetTestRouteState extends State<InheritedWidgetTestRoute> {
-  int count = 0;
+class _ThemeTestRouteState extends State<ThemeTestRoute> {
+  var _themeColor = Colors.teal; //当前路由主题色
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: ShareDataWidget(
-          //使用ShareDataWidget
-          data: count,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              Padding(
-                padding: const EdgeInsets.only(bottom: 20.0),
-                child: _TestWidget(), //子widget中依赖ShareDataWidget
+    ThemeData themeData = Theme.of(context);
+    return Theme(
+      data: ThemeData(
+          primarySwatch: _themeColor, //用于导航栏、FloatingActionButton的背景色等
+          iconTheme: IconThemeData(color: _themeColor) //用于Icon颜色
+      ),
+      child: Scaffold(
+        appBar: AppBar(title: const Text("主题测试"), backgroundColor: _themeColor),
+        body: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: <Widget>[
+            //第一行Icon使用主题中的iconTheme
+            const Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Icon(Icons.favorite),
+                  Icon(Icons.airport_shuttle),
+                  Text("  颜色跟随主题")
+                ]
+            ),
+            //为第二行Icon自定义颜色（固定为黑色)
+            Theme(
+              data: themeData.copyWith(
+                iconTheme: themeData.iconTheme.copyWith(
+                    color: Colors.black
+                ),
               ),
-              ElevatedButton(
-                child: const Text("Increment"),
-                //每点击一次，将count自增，然后重新build,ShareDataWidget的data将被更新
-                onPressed: () => setState(() => ++count),
-              )
-            ],
-          ),
+              child: const Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: <Widget>[
+                    Icon(Icons.favorite),
+                    Icon(Icons.airport_shuttle),
+                    Text("  颜色固定黑色")
+                  ]
+              ),
+            ),
+          ],
+        ),
+        floatingActionButton: FloatingActionButton(
+            onPressed: () =>  //切换主题
+            setState(() =>
+            _themeColor =
+            _themeColor == Colors.teal ? Colors.blue : Colors.teal
+            ),
+            child: const Icon(Icons.palette)
         ),
       ),
     );
