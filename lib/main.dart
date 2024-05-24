@@ -86,7 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
         // the App.build method, and use it to set our appbar title.
         title: Text(widget.title),
       ),
-      body: Center(
+      body: const Center(
         // Center is a layout widget. It takes a single child and positions it
         // in the middle of the parent.
         child: Column(
@@ -105,13 +105,8 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            PointerMoveIndicator(),
+            GestureTest(),
           ],
         ),
       ),
@@ -120,6 +115,80 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class GestureTest extends StatefulWidget {
+
+  const GestureTest({super.key});
+
+  @override
+  State<StatefulWidget> createState() {
+    return _GestureTestState();
+  }
+}
+
+class _GestureTestState extends State<GestureTest> {
+  String _operation = "No Gesture detected!"; //保存事件名
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: GestureDetector(
+        child: Container(
+          alignment: Alignment.center,
+          color: Colors.blue,
+          width: 200.0,
+          height: 100.0,
+          child: Text(
+            _operation,
+            style: const TextStyle(color: Colors.white),
+          ),
+        ),
+        onTap: () => updateText("Tap"), //点击
+        onDoubleTap: () => updateText("DoubleTap"), //双击
+        onLongPress: () => updateText("LongPress"), //长按
+      ),
+    );
+  }
+
+  void updateText(String text) {
+    //更新显示的事件名
+    setState(() {
+      _operation = text;
+    });
+  }
+}
+
+class PointerMoveIndicator extends StatefulWidget {
+
+  const PointerMoveIndicator({super.key});
+
+  @override
+  State<StatefulWidget> createState() {
+    return _PointerMoveIndicatorState();
+  }
+}
+
+class _PointerMoveIndicatorState extends State<PointerMoveIndicator> {
+  PointerEvent? _event;
+
+  @override
+  Widget build(BuildContext context) {
+    return Listener(
+      child: Container(
+        alignment: Alignment.center,
+        color: Colors.blue,
+        width: 300.0,
+        height: 150.0,
+        child: Text(
+          '${_event?.localPosition ?? ''}',
+          style: const TextStyle(color: Colors.white),
+        ),
+      ),
+      onPointerDown: (PointerDownEvent event) => setState(() => _event = event),
+      onPointerMove: (PointerMoveEvent event) => setState(() => _event = event),
+      onPointerUp: (PointerUpEvent event) => setState(() => _event = event),
     );
   }
 }
