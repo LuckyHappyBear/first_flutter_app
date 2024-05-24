@@ -110,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) {
-                    return const ScaleAnimationRoute();
+                    return const StaggerRoute();
                   }),
                 );
               },
@@ -128,65 +128,138 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class ScaleAnimationRoute extends StatefulWidget {
-  const ScaleAnimationRoute({Key? key}) : super(key: key);
-
-  @override
-  State<ScaleAnimationRoute> createState() => _ScaleAnimationRouteState();
-}
-
-// 需要继承TickerProvider，如果有多个AnimationController，则应该使用TickerProviderStateMixin。
-class _ScaleAnimationRouteState extends State<ScaleAnimationRoute>
-    with SingleTickerProviderStateMixin {
-  late Animation<double> animation;
-  late AnimationController controller;
-
-  @override
-  initState() {
-    super.initState();
-    controller = AnimationController(
-      duration: const Duration(seconds: 2),
-      vsync: this,
+class StaggerAnimation extends StatelessWidget {
+  StaggerAnimation({
+    Key? key,
+    required this.controller,
+  }) : super(key: key) {
+    //高度动画
+    height = Tween<double>(
+      begin: .0,
+      end: 300.0,
+    ).animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: const Interval(
+          0.0, 0.6, //间隔，前60%的动画时间
+          curve: Curves.ease,
+        ),
+      ),
     );
 
-    //匀速
-    //图片宽高从0变到300
-    animation = Tween(begin: 0.0, end: 300.0).animate(controller)
-      ..addListener(() {
-        setState(() => {});
-      });
+    color = ColorTween(
+      begin: Colors.green,
+      end: Colors.red,
+    ).animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: const Interval(
+          0.0, 0.6, //间隔，前60%的动画时间
+          curve: Curves.ease,
+        ),
+      ),
+    );
 
-    animation.addStatusListener((status) {
-      if (status == AnimationStatus.completed) {
-        //动画执行结束时反向执行动画
-        controller.reverse();
-      } else if (status == AnimationStatus.dismissed) {
-        //动画恢复到初始状态时执行动画（正向）
-        controller.forward();
-      }
-    });
-
-    //启动动画(正向执行)
-    controller.forward();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Center(
-        child: Image.network(
-          "https://avatars2.githubusercontent.com/u/20411648?s=460&v=4",
-          width: animation.value,
-          height: animation.value,
+    padding = Tween<EdgeInsets>(
+      begin: const EdgeInsets.only(left: .0),
+      end: const EdgeInsets.only(left: 100.0),
+    ).animate(
+      CurvedAnimation(
+        parent: controller,
+        curve: const Interval(
+          0.6, 1.0, //间隔，后40%的动画时间
+          curve: Curves.ease,
         ),
       ),
     );
   }
 
+  late final Animation<double> controller;
+  late final Animation<double> height;
+  late final Animation<EdgeInsets> padding;
+  late final Animation<Color?> color;
+
+  Widget _buildAnimation(BuildContext context, child) {
+    return Container(
+      alignment: Alignment.bottomCenter,
+      padding: padding.value,
+      child: Container(
+        color: color.value,
+        width: 50.0,
+        height: height.value,
+      ),
+    );
+  }
+
   @override
-  dispose() {
-    //路由销毁时需要释放动画资源
-    controller.dispose();
-    super.dispose();
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      builder: _buildAnimation,
+      animation: controller,
+    );
+  }
+}
+
+class StaggerRoute extends StatefulWidget {
+  const StaggerRoute({super.key});
+
+  @override
+  State<StaggerRoute> createState() => _StaggerRouteState();
+}
+
+class _StaggerRouteState extends State<StaggerRoute> with TickerProviderStateMixin {
+  late AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 2000),
+      vsync: this,
+    );
+  }
+
+  _playAnimation() async {
+    try {
+      //先正向执行动画
+      await _controller.forward().orCancel;
+      //再反向执行动画
+      await _controller.reverse().orCancel;
+    } on TickerCanceled {
+      //捕获异常。可能发生在组件销毁时，计时器会被取消。
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text("交织动画"),
+      ),
+      body: Center(
+        child: Column(
+          children: [
+            ElevatedButton(
+              onPressed: () => _playAnimation(),
+              child: const Text("start animation"),
+            ),
+            Container(
+              width: 300.0,
+              height: 300.0,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.1),
+                border: Border.all(
+                  color: Colors.black.withOpacity(0.5),
+                ),
+              ),
+              //调用我们定义的交错动画Widget
+              child: StaggerAnimation(controller: _controller),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
