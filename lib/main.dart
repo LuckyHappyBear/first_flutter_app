@@ -89,12 +89,17 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: Center(
         child: Column(children: <Widget>[
-          const ListTile(title:Text("商品列表")),
-          Expanded(
-            child: ListView.builder(itemBuilder: (BuildContext context, int index) {
-              return ListTile(title: Text("$index"));
-            }),
-          ),
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) {
+                  return const ScrollControllerTestRoute();
+                }),
+              );
+            },
+            child: const Text("open new route"),
+          )
         ]),
       ),
       floatingActionButton: FloatingActionButton(
@@ -102,6 +107,74 @@ class _MyHomePageState extends State<MyHomePage> {
         tooltip: 'Increment',
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
+    );
+  }
+}
+
+class ScrollControllerTestRoute extends StatefulWidget {
+
+  const ScrollControllerTestRoute({super.key});
+
+  @override
+  ScrollControllerTestRouteState createState() {
+    return ScrollControllerTestRouteState();
+  }
+}
+
+class ScrollControllerTestRouteState extends State<ScrollControllerTestRoute> {
+  final ScrollController _controller = ScrollController();
+  bool showToTopBtn = false; //是否显示“返回到顶部”按钮
+
+  @override
+  void initState() {
+    super.initState();
+    //监听滚动事件，打印滚动位置
+    _controller.addListener(() {
+      print(_controller.offset); //打印滚动位置
+      if (_controller.offset < 1000 && showToTopBtn) {
+        setState(() {
+          showToTopBtn = false;
+        });
+      } else if (_controller.offset >= 1000 && showToTopBtn == false) {
+        setState(() {
+          showToTopBtn = true;
+        });
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    //为了避免内存泄露，需要调用_controller.dispose
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text("滚动控制")),
+      body: Scrollbar(
+        child: ListView.builder(
+            itemCount: 100,
+            itemExtent: 50.0, //列表项高度固定时，显式指定高度是一个好习惯(性能消耗小)
+            controller: _controller,
+            itemBuilder: (context, index) {
+              return ListTile(title: Text("$index"),);
+            }
+        ),
+      ),
+      floatingActionButton: !showToTopBtn ? null : FloatingActionButton(
+          child: const Icon(Icons.arrow_upward),
+          onPressed: () {
+            //返回到顶部时执行动画
+            _controller.animateTo(
+              .0,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.ease,
+            );
+          }
+      ),
     );
   }
 }
