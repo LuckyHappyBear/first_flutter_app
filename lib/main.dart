@@ -1,5 +1,5 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:web_socket_channel/io.dart';
 
 void main() {
   runApp(const MyApp());
@@ -111,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) {
-                    return const FutureBuilderRoute();
+                    return const WebSocketRoute();
                   }),
                 );
               },
@@ -129,45 +129,77 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class FutureBuilderRoute extends StatefulWidget {
-  const FutureBuilderRoute({super.key});
+class WebSocketRoute extends StatefulWidget {
+  const WebSocketRoute({super.key});
 
   @override
-  State<StatefulWidget> createState() => _FutureBuilderRouteState();
+  State<WebSocketRoute> createState() => _WebSocketRouteState();
 }
 
-class _FutureBuilderRouteState extends State<FutureBuilderRoute> {
-  final Dio _dio = Dio();
+class _WebSocketRouteState extends State<WebSocketRoute> {
+  final TextEditingController _controller = TextEditingController();
+  late IOWebSocketChannel channel;
+  String _text = "";
+
+  @override
+  void initState() {
+    super.initState();
+    //创建websocket连接
+    channel = IOWebSocketChannel.connect('wss://echo.websocket.events');
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Dio Use case"),
+        title: const Text("WebSocket(内容回显)"),
       ),
-      body: Container(
-        alignment: Alignment.center,
-        child: FutureBuilder(
-            future: _dio.get("https://api.github.com/orgs/flutterchina/repos"),
-            builder: (BuildContext context, AsyncSnapshot snapshot) {
-              //请求完成
-              if (snapshot.connectionState == ConnectionState.done) {
-                Response response = snapshot.data;
-                //发生错误
+      body: Padding(
+        padding: const EdgeInsets.all(20.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: <Widget>[
+            Form(
+              child: TextFormField(
+                controller: _controller,
+                decoration: const InputDecoration(labelText: 'Send a message'),
+              ),
+            ),
+            StreamBuilder(
+              stream: channel.stream,
+              builder: (context, snapshot) {
+                //网络不通会走到这
                 if (snapshot.hasError) {
-                  return Text(snapshot.error.toString());
+                  _text = "网络不通...";
+                } else if (snapshot.hasData) {
+                  _text = "echo: ${snapshot.data}";
                 }
-                //请求成功，通过项目信息构建用于显示项目名称的ListView
-                return ListView(
-                  children: response.data
-                      .map<Widget>((e) => ListTile(title: Text(e["full_name"])))
-                      .toList(),
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24.0),
+                  child: Text(_text),
                 );
-              }
-              //请求未完成时弹出loading
-              return const CircularProgressIndicator();
-            }),
+              },
+            )
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _sendMessage,
+        tooltip: 'Send message',
+        child: const Icon(Icons.send),
       ),
     );
+  }
+
+  void _sendMessage() {
+    if (_controller.text.isNotEmpty) {
+      channel.sink.add(_controller.text);
+    }
+  }
+
+  @override
+  void dispose() {
+    channel.sink.close();
+    super.dispose();
   }
 }
