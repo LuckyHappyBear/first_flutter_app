@@ -105,13 +105,17 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) {
+                    return const GradientButtonRoute();
+                  }),
+                );
+              },
+              child: const Text("open composite component route"),
+            )
           ],
         ),
       ),
@@ -121,5 +125,115 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+}
+
+class GradientButton extends StatelessWidget {
+  const GradientButton({
+    Key? key,
+    this.colors,
+    this.width,
+    this.height,
+    this.onPressed,
+    this.borderRadius,
+    required this.child,
+  }) : super(key: key);
+
+  // 渐变色数组
+  final List<Color>? colors;
+
+  // 按钮宽高
+  final double? width;
+  final double? height;
+  final BorderRadius? borderRadius;
+
+  //点击回调
+  final GestureTapCallback? onPressed;
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    ThemeData theme = Theme.of(context);
+
+    //确保colors数组不空
+    List<Color> _colors = colors ?? [theme.primaryColor, theme.primaryColorDark];
+
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(colors: _colors),
+        borderRadius: borderRadius,
+        //border: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+      ),
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          splashColor: _colors.last,
+          highlightColor: Colors.transparent,
+          borderRadius: borderRadius,
+          onTap: onPressed,
+          child: ConstrainedBox(
+            constraints: BoxConstraints.tightFor(height: height, width: width),
+            child: Center(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: DefaultTextStyle(
+                  style: const TextStyle(fontWeight: FontWeight.bold),
+                  child: child,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class GradientButtonRoute extends StatefulWidget {
+  const GradientButtonRoute({Key? key}) : super(key: key);
+
+  @override
+  State<GradientButtonRoute> createState() => _GradientButtonRouteState();
+}
+
+class _GradientButtonRouteState extends State<GradientButtonRoute> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+        title: const Text("GradientButton"),
+      ),
+      body: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: <Widget>[
+          GradientButton(
+            colors: const [Colors.orange, Colors.red],
+            height: 50.0,
+            onPressed: onTap,
+            child: const Text("Submit"),
+          ),
+          GradientButton(
+            height: 50.0,
+            colors: [Colors.lightGreen, Colors.green.shade700],
+            onPressed: onTap,
+            borderRadius: const BorderRadius.all(Radius.circular(50)),
+            child: const Text("Submit"),
+          ),
+          GradientButton(
+            height: 50.0,
+            //borderRadius: const BorderRadius.all(Radius.circular(5)),
+            colors: [Colors.lightBlue.shade300, Colors.blueAccent],
+            onPressed: onTap,
+            child: const Text("Submit"),
+          ),
+        ],
+      ),
+    );
+  }
+
+  onTap() {
+    print("button click");
   }
 }
