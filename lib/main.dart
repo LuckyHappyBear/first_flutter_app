@@ -1,7 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
-import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -69,19 +68,6 @@ class _MyHomePageState extends State<MyHomePage> {
       // called again, and so nothing would appear to happen.
       _counter++;
     });
-    // 将点击次数以字符串类型写到文件中
-    await (await _getLocalFile()).writeAsString('$_counter');
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    //从文件读取点击次数
-    _readCounter().then((int value) {
-      setState(() {
-        _counter = value;
-      });
-    });
   }
 
   @override
@@ -121,13 +107,17 @@ class _MyHomePageState extends State<MyHomePage> {
           // wireframe for each widget.
           mainAxisAlignment: MainAxisAlignment.center,
           children: <Widget>[
-            const Text(
-              'You have pushed the button this many times:',
-            ),
-            Text(
-              '$_counter',
-              style: Theme.of(context).textTheme.headlineMedium,
-            ),
+            TextButton(
+              onPressed: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) {
+                    return const HttpTestRoute();
+                  }),
+                );
+              },
+              child: const Text("open new route"),
+            )
           ],
         ),
       ),
@@ -138,21 +128,72 @@ class _MyHomePageState extends State<MyHomePage> {
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
   }
+}
 
-  Future<File> _getLocalFile() async {
-    // 获取应用目录
-    String dir = (await getApplicationDocumentsDirectory()).path;
-    return File('$dir/counter.txt');
+class HttpTestRoute extends StatefulWidget {
+  const HttpTestRoute({super.key});
+
+  @override
+  State<HttpTestRoute> createState() => _HttpTestRouteState();
+}
+
+class _HttpTestRouteState extends State<HttpTestRoute> {
+  bool _loading = false;
+  String _text = "";
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Http请求"),
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          children: <Widget>[
+            ElevatedButton(
+              onPressed: _loading ? null : request,
+              child: const Text("获取百度首页"),
+            ),
+            SizedBox(
+              width: MediaQuery.of(context).size.width - 50.0,
+              child: Text(_text.replaceAll(RegExp(r"\s"), "")),
+            )
+          ],
+        ),
+      ),
+    );
   }
 
-  Future<int> _readCounter() async {
+  request() async {
+    setState(() {
+      _loading = true;
+      _text = "正在请求...";
+    });
     try {
-      File file = await _getLocalFile();
-      // 读取点击次数（以字符串）
-      String contents = await file.readAsString();
-      return int.parse(contents);
-    } on FileSystemException {
-      return 0;
+      //创建一个HttpClient
+      HttpClient httpClient = HttpClient();
+      //打开Http连接
+      HttpClientRequest request = await httpClient.getUrl(Uri.parse("https://www.baidu.com"));
+      //使用iPhone的UA
+      request.headers.add(
+        "user-agent",
+        "Mozilla/5.0 (iPhone; CPU iPhone OS 10_3_1 like Mac OS X) AppleWebKit/603.1.30 (KHTML, like Gecko) Version/10.0 Mobile/14E304 Safari/602.1",
+      );
+      //等待连接服务器（会将请求信息发送给服务器）
+      HttpClientResponse response = await request.close();
+      //读取响应内容
+      _text = await response.transform(utf8.decoder).join();
+      //输出响应头
+      print(response.headers);
+
+      //关闭client后，通过该client发起的所有请求都会终止。
+      httpClient.close();
+    } catch (e) {
+      _text = "请求失败：$e";
+    } finally {
+      setState(() {
+        _loading = false;
+      });
     }
   }
 }
