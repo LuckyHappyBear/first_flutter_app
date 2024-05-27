@@ -1,4 +1,7 @@
+import 'dart:io';
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 
 void main() {
   runApp(const MyApp());
@@ -57,7 +60,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
 
-  void _incrementCounter() {
+  void _incrementCounter() async {
     setState(() {
       // This call to setState tells the Flutter framework that something has
       // changed in this State, which causes it to rerun the build method below
@@ -65,6 +68,19 @@ class _MyHomePageState extends State<MyHomePage> {
       // _counter without calling setState(), then the build method would not be
       // called again, and so nothing would appear to happen.
       _counter++;
+    });
+    // 将点击次数以字符串类型写到文件中
+    await (await _getLocalFile()).writeAsString('$_counter');
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    //从文件读取点击次数
+    _readCounter().then((int value) {
+      setState(() {
+        _counter = value;
+      });
     });
   }
 
@@ -121,5 +137,22 @@ class _MyHomePageState extends State<MyHomePage> {
         child: const Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.
     );
+  }
+
+  Future<File> _getLocalFile() async {
+    // 获取应用目录
+    String dir = (await getApplicationDocumentsDirectory()).path;
+    return File('$dir/counter.txt');
+  }
+
+  Future<int> _readCounter() async {
+    try {
+      File file = await _getLocalFile();
+      // 读取点击次数（以字符串）
+      String contents = await file.readAsString();
+      return int.parse(contents);
+    } on FileSystemException {
+      return 0;
+    }
   }
 }
