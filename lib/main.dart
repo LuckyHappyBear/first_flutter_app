@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:math';
 
 void main() {
   runApp(const MyApp());
@@ -110,7 +111,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 Navigator.push(
                   context,
                   MaterialPageRoute(builder: (context) {
-                    return const GradientButtonRoute();
+                    return const CustomPaintRoute();
                   }),
                 );
               },
@@ -128,112 +129,86 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
-class GradientButton extends StatelessWidget {
-  const GradientButton({
-    Key? key,
-    this.colors,
-    this.width,
-    this.height,
-    this.onPressed,
-    this.borderRadius,
-    required this.child,
-  }) : super(key: key);
-
-  // 渐变色数组
-  final List<Color>? colors;
-
-  // 按钮宽高
-  final double? width;
-  final double? height;
-  final BorderRadius? borderRadius;
-
-  //点击回调
-  final GestureTapCallback? onPressed;
-
-  final Widget child;
+class CustomPaintRoute extends StatelessWidget {
+  const CustomPaintRoute({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    ThemeData theme = Theme.of(context);
-
-    //确保colors数组不空
-    List<Color> _colors = colors ?? [theme.primaryColor, theme.primaryColorDark];
-
-    return DecoratedBox(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(colors: _colors),
-        borderRadius: borderRadius,
-        //border: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20.0)),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text("CustomPaint"),
       ),
-      child: Material(
-        type: MaterialType.transparency,
-        child: InkWell(
-          splashColor: _colors.last,
-          highlightColor: Colors.transparent,
-          borderRadius: borderRadius,
-          onTap: onPressed,
-          child: ConstrainedBox(
-            constraints: BoxConstraints.tightFor(height: height, width: width),
-            child: Center(
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: DefaultTextStyle(
-                  style: const TextStyle(fontWeight: FontWeight.bold),
-                  child: child,
-                ),
-              ),
-            ),
-          ),
+      body: Center(
+        child: CustomPaint(
+          size: const Size(300, 300), //指定画布大小
+          painter: MyPainter(),
         ),
       ),
     );
   }
 }
 
-class GradientButtonRoute extends StatefulWidget {
-  const GradientButtonRoute({Key? key}) : super(key: key);
-
+class MyPainter extends CustomPainter {
   @override
-  State<GradientButtonRoute> createState() => _GradientButtonRouteState();
+  void paint(Canvas canvas, Size size) {
+    print('paint');
+    var rect = Offset.zero & size;
+    //画棋盘
+    drawChessboard(canvas, rect);
+    //画棋子
+    drawPieces(canvas, rect);
+  }
+
+  // 返回false, 后面介绍
+  @override
+  bool shouldRepaint(CustomPainter oldDelegate) => false;
 }
 
-class _GradientButtonRouteState extends State<GradientButtonRoute> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.inversePrimary,
-        title: const Text("GradientButton"),
-      ),
-      body: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: <Widget>[
-          GradientButton(
-            colors: const [Colors.orange, Colors.red],
-            height: 50.0,
-            onPressed: onTap,
-            child: const Text("Submit"),
-          ),
-          GradientButton(
-            height: 50.0,
-            colors: [Colors.lightGreen, Colors.green.shade700],
-            onPressed: onTap,
-            borderRadius: const BorderRadius.all(Radius.circular(50)),
-            child: const Text("Submit"),
-          ),
-          GradientButton(
-            height: 50.0,
-            //borderRadius: const BorderRadius.all(Radius.circular(5)),
-            colors: [Colors.lightBlue.shade300, Colors.blueAccent],
-            onPressed: onTap,
-            child: const Text("Submit"),
-          ),
-        ],
-      ),
-    );
+void drawChessboard(Canvas canvas, Rect rect) {
+  //棋盘背景
+  var paint = Paint()
+    ..isAntiAlias = true
+    ..style = PaintingStyle.fill //填充
+    ..color = const Color(0xFFDCC48C);
+  canvas.drawRect(rect, paint);
+
+  //画棋盘网格
+  paint
+    ..style = PaintingStyle.stroke //线
+    ..color = Colors.black38
+    ..strokeWidth = 1.0;
+
+  //画横线
+  for (int i = 0; i <= 15; ++i) {
+    double dy = rect.top + rect.height / 15 * i;
+    canvas.drawLine(Offset(rect.left, dy), Offset(rect.right, dy), paint);
   }
 
-  onTap() {
-    print("button click");
+  for (int i = 0; i <= 15; ++i) {
+    double dx = rect.left + rect.width / 15 * i;
+    canvas.drawLine(Offset(dx, rect.top), Offset(dx, rect.bottom), paint);
   }
+}
+
+//画棋子
+void drawPieces(Canvas canvas, Rect rect) {
+  double eWidth = rect.width / 15;
+  double eHeight = rect.height / 15;
+  //画一个黑子
+  var paint = Paint()
+    ..style = PaintingStyle.fill
+    ..color = Colors.black;
+  //画一个黑子
+  canvas.drawCircle(
+    Offset(rect.center.dx - eWidth / 2, rect.center.dy - eHeight / 2),
+    min(eWidth / 2, eHeight / 2) - 2,
+    paint,
+  );
+  //画一个白子
+  paint.color = Colors.white;
+  canvas.drawCircle(
+    Offset(rect.center.dx + eWidth / 2, rect.center.dy - eHeight / 2),
+    min(eWidth / 2, eHeight / 2) - 2,
+    paint,
+  );
 }
